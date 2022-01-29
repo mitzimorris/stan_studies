@@ -8,13 +8,15 @@ parameters {
   real<lower=0> sigma; // population sd of success log-odds
   vector[N] alpha_std; // success log-odds (standardized)
 }
+transformed parameters {
+  vector[N] alpha = mu + sigma * alpha_std;
+}
 model {
   mu ~ normal(-1, 1); // hyperprior
   sigma ~ normal(0, 1); // hyperprior
   alpha_std ~ normal(0, 1); // prior (hierarchical)
-  y ~ binomial_logit(K, mu + sigma * alpha_std); // likelihood
+  y ~ binomial_logit(K, alpha); // likelihood
 }
 generated quantities {
-  vector[N] theta = inv_logit(mu + sigma * alpha_std);
-  vector[N] alpha = mu + sigma * alpha_std;  // recover alpha
+  vector[N] theta = inv_logit(alpha);
 }
